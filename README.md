@@ -8,4 +8,4 @@ Original dictionary file from [Project Gutenberg EBook of Webster's Unabridged D
 Supplemental dictionary file from [xawill's LetterPress-Finder repo][2].
 
 [1]:http://www.gutenberg.org/files/29765/29765-8.txt
-[2]:https://github.com/xawill/LetterPress-Finder/blob/master/SortedDictionary.txt
+[2]:https://raw.github.com/xawill/LetterPress-Finder/master/SortedDictionary.txt
