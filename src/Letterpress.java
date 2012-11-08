@@ -1,59 +1,146 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Random;
+import java.util.Scanner;
+import java.util.HashSet;
 
 public class Letterpress {
-	static char[] ltrs = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+	static char[] ltrs = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+			'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+			'X', 'Y', 'Z' };
+	static HashSet<String> dict;
 	private static char[][] board;
+
+	public enum Status {
+		NEUTRAL, RED, BLUE, RED_DEFENDED, BLUE_DEFENDED
+	};
+
+	private static Status[][] status;
+
 	/**
 	 * @param args
 	 */
-	
-	public Letterpress(){
+
+	public Letterpress() {
 		initializeBoard();
+		initializeDictionary();
 	}
-	
-	private void initializeBoard(){
-		this.board = new char[5][5];
+
+	private void initializeBoard() {
+		Letterpress.board = new char[5][5];
 		Random gen = new Random(0);
-		int pos = 0;
-		for (int row = 0; row < board.length; row++){
-			for (int col = 0; col < board.length; col++){
-				this.board[row][col] = ltrs[gen.nextInt(26)];
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board.length; col++) {
+				Letterpress.board[row][col] = ltrs[gen.nextInt(26)];
 			}
 		}
+
+		Letterpress.status = new Status[5][5];
+		for (int i = 0; i < status.length; i++)
+			Arrays.fill(status[i], Status.NEUTRAL);
 	}
-	
-	public static void pBoard(){
-		for (int row = 0; row < 5; row++){
+
+	private void initializeDictionary() {
+		Letterpress.dict = new HashSet<String>();
+		File dictionary = new File("pDictionary.txt");
+		Scanner reader;
+		try {
+			reader = new Scanner(dictionary);
+		} catch (FileNotFoundException e) {
+			p("LOG: Could not find the dictionary file. Proceeding with empty dictionary.");
+			reader = new Scanner("");
+		}
+		while (reader.hasNextLine()) {
+			String word = reader.nextLine();
+			dict.add(word);
+		}
+	}
+
+	public static void pBoard() {
+		for (int row = 0; row < 5; row++) {
 			String rowStr = "";
-			for (int col = 0; col < 5; col++){
-				rowStr += board[row][col]+" ";
+			for (int col = 0; col < 5; col++) {
+				rowStr += board[row][col] + " ";
+			}
+			rowStr += "\t"+" ";
+			for (int col = 0; col < 5; col++) {
+				switch (status[row][col]) {
+				case NEUTRAL:
+					rowStr += "_" + " ";
+					break;
+				case RED:
+					rowStr += "r" + " ";
+					break;
+				case BLUE:
+					rowStr += "b" + " ";
+					break;
+				case RED_DEFENDED:
+					rowStr += "R" + " ";
+					break;
+				case BLUE_DEFENDED:
+					rowStr += "B" + " ";
+					break;
+				default:
+					rowStr += " " + " ";
+				}
+
 			}
 			p(rowStr);
 		}
+		p("");
 	}
-	
-	public static void dBoard(){
-		System.out.println("  0 1 2 3 4");
-		for (int row = 0; row < 5; row++){
-			String rowStr = row+" ";
-			for (int col = 0; col < 5; col++){
-				rowStr += board[row][col]+" ";
+
+	public static void dBoard() {
+		System.out.println("  0 1 2 3 4\t  0 1 2 3 4");
+		for (int row = 0; row < 5; row++) {
+			String rowStr = row + " ";
+			for (int col = 0; col < 5; col++) {
+				rowStr += board[row][col] + " ";
+			}
+			rowStr += "\t"+row + " ";
+			for (int col = 0; col < 5; col++) {
+				switch (status[row][col]) {
+				case NEUTRAL:
+					rowStr += "_" + " ";
+					break;
+				case RED:
+					rowStr += "r" + " ";
+					break;
+				case BLUE:
+					rowStr += "b" + " ";
+					break;
+				case RED_DEFENDED:
+					rowStr += "R" + " ";
+					break;
+				case BLUE_DEFENDED:
+					rowStr += "B" + " ";
+					break;
+				default:
+					rowStr += " " + " ";
+				}
+
 			}
 			p(rowStr);
 		}
+		p("");
 	}
-	
+
 	public static void main(String[] args) {
 		Letterpress lp = new Letterpress();
+		status[0][0] = Status.BLUE_DEFENDED;
+		status[0][1] = Status.BLUE;
+		status[1][0] = Status.BLUE;
+		status[4][4] = Status.RED_DEFENDED;
+		status[3][4] = Status.RED;
+		status[4][3] = Status.RED;
 		dBoard();
-	
+		pBoard();
 
 	}
-	
-	public static void p(String s){
+
+	public static void p(Object s) {
 		System.out.println(s);
 	}
-	
-	
 
 }
