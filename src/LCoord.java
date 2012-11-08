@@ -3,6 +3,12 @@ public class LCoord {
 	private int row;
 	private int col;
 	
+	/**
+	 * @param row
+	 * @param col
+	 * @throws BadCoordException
+	 * Creates a new LCoord object with bounds [0,4] for row and col. Throws exception if bounds are not within this range.
+	 */
 	public LCoord(int row, int col) throws BadCoordException{
 		if (checkBounds(row,col)){
 			this.row = row;
@@ -12,14 +18,27 @@ public class LCoord {
 		}
 	}
 	
+	/**
+	 * @return row
+	 */
 	public int getRow(){
 			return row;
 	}
 	
+	/**
+	 * @return col
+	 */
 	public int getCol(){
 		return col;
 	}
 	
+	/**
+	 * @param row
+	 * @param col
+	 * @return validBounds
+	 * 
+	 * Checks that row and column are contained in [0,4]
+	 */
 	private boolean checkBounds (int row, int col){
 		boolean validBounds = false;
 		if (row > -1 && row < 5 && col > -1 && col < 5){
@@ -28,10 +47,17 @@ public class LCoord {
 		return validBounds;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString(){
 		return " ["+row+", "+col+"] ";
 	}
 	
+	/**
+	 * @param args
+	 * Tests the bound checking of the constructor with several boundary tests. Includes test of toString()
+	 */
 	public static void main (String[] args){
 		try {
 			LCoord c = new LCoord(0,0);
