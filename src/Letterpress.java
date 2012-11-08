@@ -30,6 +30,7 @@ public class Letterpress {
 			ltrs.put(i,letters[i]);
 		initializeBoard();
 		initializeDictionary();
+		supplementDictionary();
 		refineDictionary();
 	}
 
@@ -71,6 +72,26 @@ public class Letterpress {
 			String word = reader.nextLine();
 			dict.add(word);
 		}
+	}
+	
+	private void supplementDictionary(){
+		int dSize = dict.size();
+		File dictionary = new File("SortedDictionary.txt");
+		Scanner reader;
+		try {
+			reader = new Scanner(dictionary);
+		} catch (FileNotFoundException e) {
+			p("LOG: Could not find the supplemental dictionary file. Proceeding with empty dictionary.");
+			reader = new Scanner("");
+		}
+		while (reader.hasNextLine()) {
+			String word = reader.nextLine();
+			word = word.toUpperCase();
+			if (!dict.contains(word))
+				dict.add(word);
+		}
+		
+		p("LOG: Supplemented the dictionary with "+(dict.size()-dSize)+" words. Now have "+dict.size()+" words.");
 	}
 
 	private void refineDictionary() {
