@@ -2,13 +2,16 @@ import java.util.Arrays;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
 
 public class Letterpress {
-	static char[] ltrs = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+	static char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
 			'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
 			'X', 'Y', 'Z' };
+	static HashMap ltrs;
 	static HashSet<String> dict;
 	private static char[][] board;
 
@@ -22,6 +25,9 @@ public class Letterpress {
 	* Letterpress constructor. Intializes the board and the dictionary.
 	*/
 	public Letterpress() {
+		this.ltrs = new HashMap <Integer, Character> (26);
+		for (int i=0; i<letters.length;i++)
+			ltrs.put(i,letters[i]);
 		initializeBoard();
 		initializeDictionary();
 	}
@@ -35,7 +41,7 @@ public class Letterpress {
 		Random gen = new Random(0);
 		for (int row = 0; row < board.length; row++) {
 			for (int col = 0; col < board.length; col++) {
-				Letterpress.board[row][col] = ltrs[gen.nextInt(26)];
+				Letterpress.board[row][col] = (Character)ltrs.get(gen.nextInt(26));
 			}
 		}
 
@@ -66,6 +72,50 @@ public class Letterpress {
 		}
 	}
 
+	private void refineDictionary() {
+		int dSize = dict.size();
+		if (board != null && dict !=null && dict.size() > 0){
+			//build counted list of char in the game board and a list of their counts
+			int[] ltrCount = new int[26];
+			p(Arrays.toString(ltrCount));
+			for(int row=0; row<board.length; row++){
+				for (int col=0; col<board.length; col++){
+					char ltr = board[row][col];
+					int i = 0;
+					while (ltr != letters[i]){
+						i++;
+					}
+					ltrCount[i]+=1;
+				}
+			}
+			//loop through the dictionary and remove words that cannot be played
+			Iterator <String> iter = dict.iterator();
+			while (iter.hasNext()){
+				String word = iter.next();
+				int[] wordLtrCount = new int [26];
+				
+				for(int i = 0; i < word.length();i++){
+					char ltr = word.charAt(i);
+					int j = 0;
+					while (ltr != letters[j]){
+						j++;
+					}
+					wordLtrCount[j]+=1;
+				}
+				
+				for(int i=0;i<26;i++){
+					if ((ltrCount[i]-wordLtrCount[i]) < 0){
+						dict.remove(word);
+						break;
+					}
+				}	
+			} //end while iter.hasNext
+			
+			p("LOG: Refine removed "+(dSize-dict.size())+" words from the dictionary.");
+		} else {
+			p("LOG: Unable to refine dictionary.");
+		}
+	}
 	/**
 	 * Prints out the current board.
 	 */
