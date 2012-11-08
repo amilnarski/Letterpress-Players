@@ -11,7 +11,7 @@ public class Letterpress {
 	static char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
 			'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
 			'X', 'Y', 'Z' };
-	static HashMap ltrs;
+	static HashMap<Integer, Character> ltrs;
 	static HashSet<String> dict;
 	private static char[][] board;
 
@@ -25,11 +25,12 @@ public class Letterpress {
 	* Letterpress constructor. Intializes the board and the dictionary.
 	*/
 	public Letterpress() {
-		this.ltrs = new HashMap <Integer, Character> (26);
+		Letterpress.ltrs = new HashMap <Integer, Character> (26);
 		for (int i=0; i<letters.length;i++)
 			ltrs.put(i,letters[i]);
 		initializeBoard();
 		initializeDictionary();
+		refineDictionary();
 	}
 
 	/**
@@ -77,7 +78,6 @@ public class Letterpress {
 		if (board != null && dict !=null && dict.size() > 0){
 			//build counted list of char in the game board and a list of their counts
 			int[] ltrCount = new int[26];
-			p(Arrays.toString(ltrCount));
 			for(int row=0; row<board.length; row++){
 				for (int col=0; col<board.length; col++){
 					char ltr = board[row][col];
@@ -88,6 +88,7 @@ public class Letterpress {
 					ltrCount[i]+=1;
 				}
 			}
+			p(Arrays.toString(ltrCount));
 			//loop through the dictionary and remove words that cannot be played
 			Iterator <String> iter = dict.iterator();
 			while (iter.hasNext()){
@@ -105,13 +106,13 @@ public class Letterpress {
 				
 				for(int i=0;i<26;i++){
 					if ((ltrCount[i]-wordLtrCount[i]) < 0){
-						dict.remove(word);
+						iter.remove();
 						break;
 					}
 				}	
 			} //end while iter.hasNext
 			
-			p("LOG: Refine removed "+(dSize-dict.size())+" words from the dictionary.");
+			p("LOG: Refine removed "+(dSize-dict.size())+" words from the dictionary. "+dict.size()+" words remain.");
 		} else {
 			p("LOG: Unable to refine dictionary.");
 		}
@@ -202,6 +203,7 @@ public class Letterpress {
 		status[3][4] = Status.RED;
 		status[4][3] = Status.RED;
 		dBoard();
+		p(dict.toString());
 	}
 
 	/**
