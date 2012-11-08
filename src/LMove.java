@@ -1,7 +1,16 @@
 import java.util.ArrayList;
+import java.util.Iterator;
 
+/**
+ * @author Aaron Miller
+ * 
+ * Class maintains a Letterpress move, consisting as a set of Letterpress coordinates.
+ * Coordinates may be added as int row, col or as an LCoord. Bad coordinates are rejected.
+ * If no valid coordinates are passed the move will be flagged as a pass.
+ *
+ */
 public class LMove {
-	boolean isPass;
+	private boolean isPass;
 	ArrayList<LCoord> coord;
 
 	public LMove(LCoord[] ltrCoords) {
@@ -24,9 +33,11 @@ public class LMove {
 	}
 
 	public void addLCoord(int row, int col) {
-		if (coord != null) {
+		if (coord == null) {
 			coord = new ArrayList<LCoord>();
+			isPass = true;
 		}
+		
 		try {
 			coord.add(new LCoord(row, col));
 			isPass = false;
@@ -37,7 +48,29 @@ public class LMove {
 	}
 
 	public void addLCoord(LCoord c) {
+		if (coord == null) {
+			coord = new ArrayList<LCoord>();
+			isPass = true;
+		}
+		
 		coord.add(c);
+		isPass = false;
+	}
+	
+	public boolean isPass(){
+		return isPass;
+	}
+	
+	public Iterator<LCoord> iterator(){
+		if (coord!=null)
+			return coord.iterator();
+		else if (!isPass){
+			Letterpress.p("LOG: LMove.iterator called when coord is null.");
+			return new ArrayList<LCoord>(0).iterator();
+		} else {
+			Letterpress.p("LOG: LMove.iterator called on a pass move.");
+			return new ArrayList<LCoord>(0).iterator();
+		}
 	}
 
 }
