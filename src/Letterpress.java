@@ -1,9 +1,9 @@
+import java.util.Arrays;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.HashSet;
 
 public class Letterpress {
 	static char[] ltrs = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
@@ -18,6 +18,9 @@ public class Letterpress {
 
 	private static Status[][] status;
 
+	/**
+	* Letterpress constructor. Intializes the board and the dictionary.
+	*/
 	public Letterpress() {
 		initializeBoard();
 		initializeDictionary();
@@ -93,7 +96,6 @@ public class Letterpress {
 				default:
 					rowStr += " " + " ";
 				}
-
 			}
 			p(rowStr);
 		}
@@ -131,7 +133,6 @@ public class Letterpress {
 				default:
 					rowStr += " " + " ";
 				}
-
 			}
 			p(rowStr);
 		}
@@ -151,8 +152,6 @@ public class Letterpress {
 		status[3][4] = Status.RED;
 		status[4][3] = Status.RED;
 		dBoard();
-		// pBoard();
-
 	}
 
 	/**
