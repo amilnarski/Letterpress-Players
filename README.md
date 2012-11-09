@@ -1,6 +1,21 @@
 # Letterpress
-
 Working on Letterpress in Java, may add intelligent players.
+
+## Classes
+### BadCoordException
+Exception thrown when LCoord is instantiated with bad coordinates.
+### LCoord
+Set of (row, col) coordinates safe for accessing the game board. 
+### LMove
+List of LCoord representing a list of letters that will signify a word or a pass.
+### Letterpress
+The main game class which is responsible for managing the game.
+
+## Interfaces
+### Game
+Specifies what methods are needed to be playable by an Player.
+### Player
+Specifies the methods a Player needs to interact with a Game.
 
 ## Sources and Attribution
 Original dictionary file from [Project Gutenberg EBook of Webster's Unabridged Dictionary][1] by Various.
