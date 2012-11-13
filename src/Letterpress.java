@@ -7,19 +7,21 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.Scanner;
 
-public class Letterpress {
+public class Letterpress implements Game{
 	private static char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-			'V', 'W', 'X', 'Y', 'Z' };
+		'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+		'V', 'W', 'X', 'Y', 'Z' };
 	private static HashMap<Integer, Character> ltrs;
 	private static HashSet<String> dict;
 	private static char[][] board;
+	private Player red;
+	private Player blue;
 
-	public static enum Status {
+	protected static enum Status {
 		NEUTRAL, RED, BLUE, RED_DEFENDED, BLUE_DEFENDED
 	};
 
-	public static enum Color {
+	protected static enum Color {
 		RED, BLUE
 	};
 
@@ -35,9 +37,9 @@ public class Letterpress {
 		Random gen = new Random(0);
 
 		if (gen.nextInt() % 2 == 0)
-			this.cPlayer = Color.RED;
+			Letterpress.cPlayer = Color.RED;
 		else
-			this.cPlayer = Color.BLUE;
+			Letterpress.cPlayer = Color.BLUE;
 
 		Letterpress.ltrs = new HashMap<Integer, Character>(26);
 		for (int i = 0; i < letters.length; i++)
@@ -64,8 +66,8 @@ public class Letterpress {
 		Letterpress.status = new Status[5][5];
 		for (int i = 0; i < status.length; i++)
 			Arrays.fill(status[i], Status.NEUTRAL); // need to loop to do this
-													// since Arrays errors out
-													// on a matrix
+		// since Arrays errors out
+		// on a matrix
 	}
 
 	/**
@@ -131,6 +133,10 @@ public class Letterpress {
 			Iterator<String> iter = dict.iterator();
 			while (iter.hasNext()) {
 				String word = iter.next();
+				if (word.length() < 2){
+					iter.remove();
+					continue;
+				}
 				int[] wordLtrCount = new int[26];
 
 				for (int i = 0; i < word.length(); i++) {
@@ -232,9 +238,9 @@ public class Letterpress {
 		p();
 	}
 
-	public void receiveMove(LMove m) {
+	private void receiveMove(LMove m) {
 		if (!m.isPass()) {
-			//CHECK THE WORD'S VALIDITY
+			//CHECK THE WORD'S VALIDITY FOR THE BOARD
 			Iterator<LCoord> i = m.iterator();
 			while (i.hasNext()) {
 				LCoord c = i.next();
@@ -242,7 +248,7 @@ public class Letterpress {
 						==Status.RED_DEFENDED)
 						&& !(Letterpress.status[c.getRow()][c.getCol()]
 								==Status.BLUE_DEFENDED)) {
-					switch (this.cPlayer) {
+					switch (Letterpress.cPlayer) {
 					case RED:
 						Letterpress.status[c.getRow()][c.getCol()] = Status.RED;
 						break;
@@ -254,50 +260,69 @@ public class Letterpress {
 			}
 			checkDefended();
 		}
-		switch (this.cPlayer) {
+		switch (Letterpress.cPlayer) {
 		case RED:
-			this.cPlayer = Color.BLUE;
+			this.rLastMove = m;
+			Letterpress.cPlayer = Color.BLUE;
 			break;
 		case BLUE:
-			this.cPlayer = Color.RED;
+			this.bLastMove = m;
+			Letterpress.cPlayer = Color.RED;
 			break;
 		}
+		dBoard();
+		notifyReadyForNextMove();
+	}
+
+	private void notifyReadyForNextMove(){
+		switch (Letterpress.cPlayer) {
+		case RED:
+			this.red.giveMove();
+			break;
+		case BLUE:
+			this.blue.giveMove();
+			break;
+		}
+	}
+
+	private void startGame(){
+		notifyReadyForNextMove();
 	}
 
 	private void checkDefended() {
 		for (int row =0; row < status.length; row++){
 			for (int col =0; col < status.length; col++){
 				if (status[row][col] != Status.NEUTRAL) {
-//					p("Current Position:  "+row+","+col);
+					//					p("Current Position:  "+row+","+col);
 					//build adjacent positions
 					HashSet<Status> s = new HashSet<Status>();
 					LCoord c;
 					try {
 						c = new LCoord(row, col - 1);
-//						p("left"+c);
-//						p(getColor(status[c.getRow()][c.getCol()]));
+						//						p("left"+c);
+						//						p(getColor(status[c.getRow()][c.getCol()]));
 						s.add(status[c.getRow()][c.getCol()]);
 					} catch (BadCoordException e) {
 					}
 					try {
 						c = new LCoord(row, col + 1);
 						s.add(status[c.getRow()][c.getCol()]);
-//						p("right"+c);
-//						p(getColor(status[c.getRow()][c.getCol()]));
+						//						p("right"+c);
+						//						p(getColor(status[c.getRow()][c.getCol()]));
 					} catch (BadCoordException e) {
 					}
 					try {
 						c = new LCoord(row - 1, col);
 						s.add(status[c.getRow()][c.getCol()]);
-//						p("up"+c);
-//						p(getColor(status[c.getRow()][c.getCol()]));
+						//						p("up"+c);
+						//						p(getColor(status[c.getRow()][c.getCol()]));
 					} catch (BadCoordException e) {
 					}
 					try {
 						c = new LCoord(row + 1, col);
 						s.add(status[c.getRow()][c.getCol()]);
-//						p("down"+c);
-//						p(getColor(status[c.getRow()][c.getCol()]));
+						//						p("down"+c);
+						//						p(getColor(status[c.getRow()][c.getCol()]));
 					} catch (BadCoordException e) {
 					}
 					//check that all surrounding are same color
@@ -305,18 +330,18 @@ public class Letterpress {
 					Iterator<Status> i = s.iterator();
 					boolean defended = true;
 					Color current = getColor(status[row][col]);
-//					p("Current Color:"+current);
-//					p("sack: "+s);
+					//					p("Current Color:"+current);
+					//					p("sack: "+s);
 					while (i.hasNext()) {
 						Color neighborColor = getColor(i.next());
-//						p("neigh: "+neighborColor);
-//						p("equality: "+""+(null==current));
+						//						p("neigh: "+neighborColor);
+						//						p("equality: "+""+(null==current));
 						if (neighborColor == current)
 							defended = defended & true;
 						else
 							defended = defended & false;
 					}
-					
+
 					if (defended) {
 						isDefended(row, col);
 					}
@@ -326,7 +351,7 @@ public class Letterpress {
 			}
 		}
 	}
-	
+
 	private static Color getColor(Status s){
 		switch(s){
 		case RED:
@@ -338,9 +363,9 @@ public class Letterpress {
 		default:
 			return null;
 		}
-		
+
 	}
-	
+
 	private void isDefended(int row, int col) {
 		switch (Letterpress.status[row][col]) {
 		case RED:
@@ -352,8 +377,21 @@ public class Letterpress {
 			Letterpress.status[row][col] = Status.BLUE_DEFENDED;
 			break;
 		default:
-			p("LOG: checkDefended is broken or switch in isDefended is not working.ÑPassed "+status[row][col]);
+			p("LOG: checkDefended is broken or switch in isDefended is not working.â€”Passed "+status[row][col]);
 			break;
+		}
+	}
+
+	public void assignPlayer(Player player){
+		if (this.red == null){
+			this.red = player;
+			this.red.giveColor(Color.RED);
+		} else if (this.blue == null){
+			this.blue = player;
+			this.blue.giveColor(Color.BLUE);
+			startGame();
+		} else {
+			p("LOG: Player attempted to join the game. Two players are already assigned.");
 		}
 	}
 
@@ -362,30 +400,30 @@ public class Letterpress {
 	 *            Generates a new Letterpress game.
 	 */
 	public static void main(String[] args) {
-		for (int i = 0; i < 10; i++) {
-			Letterpress lp = new Letterpress();
-			p(cPlayer);
-			LMove one = new LMove();
-			one.addLCoord(0, 0);
-			one.addLCoord(0, 1);
-			one.addLCoord(1, 0);
-			lp.receiveMove(one);
-			dBoard();
-			LMove two = new LMove();
-			two.addLCoord(4, 4);
-			two.addLCoord(3, 4);
-			two.addLCoord(4, 3);
-			lp.receiveMove(two);
-			dBoard();
-			LMove three = new LMove();
-			three.addLCoord(1, 1);
-			three.addLCoord(1, 2);
-			three.addLCoord(2, 1);
-			lp.receiveMove(three);
-			dBoard();
-		}
+		Letterpress lp = new Letterpress();
+		Player r = new HumanPlayer(lp);
+		Player b = new AutoPlayer(lp);
+		/*p(Letterpress.cPlayer);
+		LMove one = new LMove();
+		one.addLCoord(0, 0);
+		one.addLCoord(0, 1);
+		one.addLCoord(1, 0);
+		lp.receiveMove(one);
+		dBoard();
+		LMove two = new LMove();
+		two.addLCoord(4, 4);
+		two.addLCoord(3, 4);
+		two.addLCoord(4, 3);
+		lp.receiveMove(two);
+		dBoard();
+		LMove three = new LMove();
+		three.addLCoord(1, 1);
+		three.addLCoord(1, 2);
+		three.addLCoord(2, 1);
+		lp.receiveMove(three);
+		dBoard();
 		p(dict.toString());
-		p("LOG: Finished running.");
+		p("LOG: Finished running.");*/
 	}
 
 	/**
@@ -405,6 +443,29 @@ public class Letterpress {
 
 	public Color getcPlayer() {
 		return cPlayer;
+	}
+
+	@Override
+	public void receiveMove(Move move) {
+		LMove m = (LMove) move;
+		receiveMove(m);
+	}
+
+	@Override
+	public void undoMove() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void score() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public GameState state() {
+		return new GameState(board,status,dict);
 	}
 
 }
