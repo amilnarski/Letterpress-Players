@@ -4,4 +4,5 @@ public interface Game {
 	public void undoMove();
 	public void score();
 	public Game state();
+	public void assignPlayer (Player player);
 }
