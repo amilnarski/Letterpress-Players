@@ -1,8 +1,8 @@
 
 public interface Game {
-	public void receiveMove();
+	public void receiveMove(Move m);
 	public void undoMove();
 	public void score();
-	public Game state();
+	public GameState state();
 	public void assignPlayer (Player player);
 }
