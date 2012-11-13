@@ -1,6 +1,11 @@
 
 public class BadCoordException extends Exception {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L; //Java default
+
 	public BadCoordException() {
 		// TODO Auto-generated constructor stub
 	}
