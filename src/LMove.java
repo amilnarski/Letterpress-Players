@@ -9,7 +9,7 @@ import java.util.Iterator;
  * If no valid coordinates are passed the move will be flagged as a pass.
  *
  */
-public class LMove {
+public class LMove extends Move{
 	private boolean isPass;
 	ArrayList<LCoord> coord;
 
