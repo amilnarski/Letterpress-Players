@@ -2,9 +2,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 
-public class AutoPlayer extends LPlayer {
+public class RandomPlayer extends LPlayer {
 
-	public AutoPlayer(Game game) {
+	public RandomPlayer(Game game) {
 		super(game);
 	}
 	

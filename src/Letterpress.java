@@ -441,8 +441,8 @@ public class Letterpress implements Game {
 	 */
 	public static void main(String[] args) {
 		Letterpress lp = new Letterpress();
-		Player r = new GreedyPlayer(lp);
-		Player b = new GreedyPlayer(lp);
+		new GreedyPlayer(lp);
+		new RandomPlayer(lp);
 		/*
 		 * p(Letterpress.cPlayer); LMove one = new LMove(); one.addLCoord(0, 0);
 		 * one.addLCoord(0, 1); one.addLCoord(1, 0); lp.receiveMove(one);
