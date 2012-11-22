@@ -54,36 +54,27 @@ public class Letterpress implements Game {
 		for (int row = 0; row < status.length; row++) {
 			for (int col = 0; col < status.length; col++) {
 				if (status[row][col] != Status.NEUTRAL) {
-					// p("Current Position:  "+row+","+col);
 					// build adjacent positions
 					HashSet<Status> s = new HashSet<Status>();
 					LCoord c;
 					try {
 						c = new LCoord(row, col - 1);
-						// p("left"+c);
-						// p(getColor(status[c.getRow()][c.getCol()]));
 						s.add(status[c.getRow()][c.getCol()]);
 					} catch (BadCoordException e) {
 					}
 					try {
 						c = new LCoord(row, col + 1);
 						s.add(status[c.getRow()][c.getCol()]);
-						// p("right"+c);
-						// p(getColor(status[c.getRow()][c.getCol()]));
 					} catch (BadCoordException e) {
 					}
 					try {
 						c = new LCoord(row - 1, col);
 						s.add(status[c.getRow()][c.getCol()]);
-						// p("up"+c);
-						// p(getColor(status[c.getRow()][c.getCol()]));
 					} catch (BadCoordException e) {
 					}
 					try {
 						c = new LCoord(row + 1, col);
 						s.add(status[c.getRow()][c.getCol()]);
-						// p("down"+c);
-						// p(getColor(status[c.getRow()][c.getCol()]));
 					} catch (BadCoordException e) {
 					}
 					// check that all surrounding are same color
@@ -91,24 +82,13 @@ public class Letterpress implements Game {
 					Iterator<Status> i = s.iterator();
 					boolean defended = true;
 					Color current = getColor(status[row][col]);
-					// p("Current Color:"+current);
-					// p("sack: "+s);
 					while (i.hasNext()) {
 						Color neighborColor = getColor(i.next());
-//						if (row == 4 && col == 0){
-//							p("neigh: "+neighborColor+"\tcurr: "+current);
-//						}
 						if (neighborColor == current){
 							defended = defended & true;
-//							if (row == 4 && col == 0){
-//								p("n==c: "+defended);
-//							}
 						}
 						else{
 							defended = defended & false;
-//							if (row == 4 && col == 0){
-//								p("n!=c: "+defended);
-//							}
 						}
 					}
 
@@ -133,10 +113,6 @@ public class Letterpress implements Game {
 				}
 			}
 		}
-	}
-	
-	private boolean checkMoveValidity(LMove mv){
-		return false;
 	}
 	
 	/**
@@ -367,17 +343,15 @@ public class Letterpress implements Game {
 		Iterator <LCoord> i  = m.iterator();
 		while(i.hasNext()){
 			LCoord c = i.next();
-			if(this.status[c.getRow()][c.getCol()]!= noChange){
-				this.status[c.getRow()][c.getCol()] = changeTo;
+			if(Letterpress.status[c.getRow()][c.getCol()]!= noChange){
+				Letterpress.status[c.getRow()][c.getCol()] = changeTo;
 			}
 		}
 		//update the status of the game board
 		this.checkDefended();
 	}
 	
-	private void notifyReadyForNextMove() {
-		this.cPlayer.notifyOfTurn();
-	}
+
 
 	/**
 	 * @param s
