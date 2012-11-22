@@ -95,16 +95,38 @@ public class Letterpress implements Game {
 					// p("sack: "+s);
 					while (i.hasNext()) {
 						Color neighborColor = getColor(i.next());
-						// p("neigh: "+neighborColor);
-						// p("equality: "+""+(null==current));
-						if (neighborColor == current)
+//						if (row == 4 && col == 0){
+//							p("neigh: "+neighborColor+"\tcurr: "+current);
+//						}
+						if (neighborColor == current){
 							defended = defended & true;
-						else
+//							if (row == 4 && col == 0){
+//								p("n==c: "+defended);
+//							}
+						}
+						else{
 							defended = defended & false;
+//							if (row == 4 && col == 0){
+//								p("n!=c: "+defended);
+//							}
+						}
 					}
 
 					if (defended) {
 						isDefended(row, col);
+					} else {
+						switch(status[row][col]){
+						case NEUTRAL:
+							break;
+						case RED_DEFENDED:
+						case RED:
+							status[row][col] = Status.RED;
+							break;
+						case BLUE_DEFENDED:
+						case BLUE:
+							status[row][col] = Status.BLUE;
+							break;
+						}
 					}
 					s.clear();
 					defended = true;
@@ -314,6 +336,7 @@ public class Letterpress implements Game {
 			break;
 		}
 		if(m.isPass()){
+			p("[PASS]");
 			return;
 		}
 		//throw all prefixes of the word out of the dictionary
@@ -516,12 +539,12 @@ public class Letterpress implements Game {
 	}
 	
 	private void run(){
-		Scanner slow = new Scanner(System.in);
+//		Scanner slow = new Scanner(System.in);
 		//check game is not over
 		int moves = 0;
 		while (!isOver()){
 			moves++;
-			slow.nextLine();
+//			slow.nextLine();
 			waitForMove = true;
 			//notify current player it is their turn
 			cPlayer.notifyOfTurn();
