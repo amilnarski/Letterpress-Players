@@ -9,6 +9,10 @@ public abstract class LPlayer implements Player{
 		g.assignPlayer(this);
 	}
 	
+	public void notifyOfTurn(){
+		giveMove();
+	}
+	
 	public void giveMove(){
 		Letterpress.p("LOG: LPlayer's giveMove() called. This needs to be overridden by any subclasses.");
 	}

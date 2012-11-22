@@ -47,7 +47,6 @@ public class GreedyPlayer extends LPlayer {
 			}
 		}
 		super.g.receiveMove(mv);
-
 	}
 
 }

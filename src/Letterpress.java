@@ -15,6 +15,7 @@ public class Letterpress implements Game {
 			'V', 'W', 'X', 'Y', 'Z' };
 	private static HashMap<Integer, Character> ltrs;
 	private static HashSet<String> dict;
+	//private static HashSet<String> playedWords;
 	private static char[][] board;
 	
 	//CLASS VARIABLES
@@ -267,20 +268,24 @@ public class Letterpress implements Game {
 	 * Letterpress constructor. Initializes the board and the dictionary.
 	 */
 	public Letterpress() {
+		//choose the first player
 		Random gen = new Random(0);
-
 		if (gen.nextInt() % 2 == 0)
 			cPlayer = red;
 		else
 			cPlayer = blue;
-
+		//set up the [0,25] --> letter map
 		Letterpress.ltrs = new HashMap<Integer, Character>(26);
 		for (int i = 0; i < letters.length; i++)
 			ltrs.put(i, letters[i]);
+		//build the gameboard
 		initializeBoard();
+		//build the dictionary
 		initializeDictionary();
 		supplementDictionary();
 		refineDictionary();
+		//initialize any other variables for play
+		//this.playedWords = new HashSet<String>();
 	}
 
 	/**
@@ -293,8 +298,58 @@ public class Letterpress implements Game {
 		new RandomPlayer(lp);
 	}
 	
-	private void makeMove(LMove mv){
-
+	private void makeMove(LMove m){
+		Status changeTo = null;
+		Status noChange = null;
+		switch(this.getCPlayer()){
+		case RED:
+			changeTo = Status.RED;
+			noChange = Status.BLUE_DEFENDED;
+			this.rLastMove = m;
+			break;
+		case BLUE:
+			changeTo = Status.BLUE;
+			noChange = Status.RED_DEFENDED;
+			this.bLastMove = m;
+			break;
+		}
+		if(m.isPass()){
+			return;
+		}
+		//throw all prefixes of the word out of the dictionary
+		String mStr = "";
+		for (Iterator<LCoord> i = m.iterator(); i.hasNext();) {
+			LCoord c = i.next();
+			mStr += board[c.getRow()][c.getCol()];
+		}
+		
+		for (Iterator<String> i = dict.iterator();i.hasNext();){
+			if (mStr.startsWith(i.next())){
+				i.remove();
+			}
+		}
+		//change the color of the tiles if that's applicable
+		
+		
+		switch(this.getCPlayer()){
+		case RED:
+			changeTo = Status.RED;
+			noChange = Status.BLUE_DEFENDED;
+			break;
+		case BLUE:
+			changeTo = Status.BLUE;
+			noChange = Status.RED_DEFENDED;
+			break;
+		}
+		Iterator <LCoord> i  = m.iterator();
+		while(i.hasNext()){
+			LCoord c = i.next();
+			if(this.status[c.getRow()][c.getCol()]!= noChange){
+				this.status[c.getRow()][c.getCol()] = changeTo;
+			}
+		}
+		//update the status of the game board
+		this.checkDefended();
 	}
 	
 	private void notifyReadyForNextMove() {
@@ -358,7 +413,7 @@ public class Letterpress implements Game {
 		this.waitForMove = false;
 	}
 	
-	private void receiveMove(LMove m) {
+	/*private void receiveMove(LMove m) {
 		if (!m.isPass()) {
 			// CHECK THE WORD'S VALIDITY FOR THE BOARD
 			String mStr = "";
@@ -368,7 +423,7 @@ public class Letterpress implements Game {
 			}
 
 			if (!dict.contains(mStr)) {
-				p("LOG: Move recieved from the "
+				p("LOG: Move received from the "
 						+ cPlayer
 						+ " player was not contained in the dictionary. Returning for now. Probably want to do something more reasonable and exciting here in the future.");
 				return;
@@ -405,7 +460,7 @@ public class Letterpress implements Game {
 		}
 		dBoard();
 		notifyReadyForNextMove();
-	}
+	}*/
 	
 	private void refineDictionary() {
 		int dSize = dict.size();
@@ -461,18 +516,23 @@ public class Letterpress implements Game {
 	}
 	
 	private void run(){
+		Scanner slow = new Scanner(System.in);
 		//check game is not over
+		int moves = 0;
 		while (!isOver()){
+			moves++;
+			slow.nextLine();
 			waitForMove = true;
 			//notify current player it is their turn
 			cPlayer.notifyOfTurn();
 			//when next move is received
 			//check the move's validity
-			if(checkMoveValidity(this.receivedMv)){
-				
+			if(validateMove(this.receivedMv)){
+				//make the move
+				makeMove(this.receivedMv);
 			}
-			//make the move
-			makeMove(this.receivedMv);
+			// print the board for debugging
+			dBoard();
 			//change the current player
 			switch(getCPlayer()){
 			case RED:
@@ -486,6 +546,9 @@ public class Letterpress implements Game {
 			}
 			//loop to 1
 		}
+		//game is over, print the score
+		p("moves: "+moves);
+		score();
 	}
 	
 	@Override
@@ -514,7 +577,12 @@ public class Letterpress implements Game {
 	
 	private void startGame() {
 		//set the current player
-		
+		Random r = new Random(0);
+		if (r.nextInt()%2 == 0){
+			this.cPlayer = this.red;
+		} else {
+			this.cPlayer = this.blue;
+		}
 		//set the gameflow booleans
 		waitForMove = false;
 		run();
@@ -549,5 +617,40 @@ public class Letterpress implements Game {
 	@Override
 	public void undoMove() {
 
+	}
+	
+	public boolean validateMove(LMove m){
+		boolean valid;
+		//check if move is a pass
+		if (m.isPass()){
+			valid = true;
+		} else {
+			//build the word described by m from the board
+			String mStr = "";
+			for (Iterator<LCoord> i = m.iterator(); i.hasNext();) {
+				LCoord c = i.next();
+				mStr += board[c.getRow()][c.getCol()];
+			}
+			//check length to make sure it's >= 2
+			//check string is in the current dictionary
+			if (mStr.length() >= 2 && dict.contains(mStr)){
+				//check to make sure the word is not a prefix of any previously played word.
+				/*Iterator<String> i = playedWords.iterator(); //This isn't needed because we've removed all prefixes from the dict in makeMove()
+				while(i.hasNext()){
+					String w = i.next();
+					if(w.startsWith(mStr)){
+						valid = false;
+						break;
+					} else {
+						valid = true;
+					}
+				}*/
+				valid = true;
+			} else {
+				p("LOG: Submitted move was found to be too short or was a word no longer in the dictionary");
+				valid = false;
+			}
+		}
+		return valid;
 	}
 }
