@@ -6,6 +6,7 @@ public class RandomPlayer extends LPlayer {
 
 	public RandomPlayer(Game game) {
 		super(game);
+		super.notifyReadyToPlay();
 	}
 	
 	public void giveMove(){

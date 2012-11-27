@@ -5,4 +5,5 @@ public interface Game {
 	public void score();
 	public GameState state();
 	public void assignPlayer (Player player);
+	public void readyToPlay(Player Player);
 }

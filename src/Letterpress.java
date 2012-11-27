@@ -8,19 +8,21 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Letterpress implements Game {
-	
+
 	//STATIC VARIABLES
 	private static char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-			'V', 'W', 'X', 'Y', 'Z' };
+		'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+		'V', 'W', 'X', 'Y', 'Z' };
 	private static HashMap<Integer, Character> ltrs;
 	private static HashSet<String> dict;
 	//private static HashSet<String> playedWords;
 	private static char[][] board;
-	
+
 	//CLASS VARIABLES
 	private Player red;
 	private Player blue;
+	private boolean redReady;
+	private boolean blueReady;
 	protected static enum Status {
 		NEUTRAL, RED, BLUE, RED_DEFENDED, BLUE_DEFENDED
 	};
@@ -31,8 +33,9 @@ public class Letterpress implements Game {
 	private LMove bLastMove;
 	private LMove rLastMove;
 	private static Status[][] status;
-	
+
 	//GAMEFLOW VALUES
+	@SuppressWarnings("unused")
 	private boolean waitForMove;
 	private LMove receivedMv;
 
@@ -44,12 +47,11 @@ public class Letterpress implements Game {
 		} else if (this.blue == null) {
 			this.blue = player;
 			this.blue.giveColor(Color.BLUE);
-			startGame();
 		} else {
 			p("LOG: Player attempted to join the game. Two players are already assigned.");
 		}
 	}
-	
+
 	private void checkDefended() {
 		for (int row = 0; row < status.length; row++) {
 			for (int col = 0; col < status.length; col++) {
@@ -114,7 +116,7 @@ public class Letterpress implements Game {
 			}
 		}
 	}
-	
+
 	/**
 	 * Prints out the current game board with indices to aid in debugging.
 	 */
@@ -153,7 +155,7 @@ public class Letterpress implements Game {
 		p();
 	}
 
-	private static Color getColor(Status s) {
+	protected static Color getColor(Status s) {
 		switch (s) {
 		case RED:
 		case RED_DEFENDED:
@@ -166,7 +168,7 @@ public class Letterpress implements Game {
 		}
 
 	}
-	
+
 	public Color getCPlayer() {
 		if (this.cPlayer == this.red){
 			return Color.RED;
@@ -178,7 +180,7 @@ public class Letterpress implements Game {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Initializes the game board with a random set of letters and sets each
 	 * letter to be NEUTRAL.
@@ -198,7 +200,7 @@ public class Letterpress implements Game {
 		// since Arrays errors out
 		// on a matrix
 	}
-	
+
 	/**
 	 * Reads in the words from pDictionary.txt and adds them to the in-memory
 	 * dictionary.
@@ -218,7 +220,7 @@ public class Letterpress implements Game {
 			dict.add(word);
 		}
 	}
-	
+
 	private void isDefended(int row, int col) {
 		switch (Letterpress.status[row][col]) {
 		case RED:
@@ -235,7 +237,7 @@ public class Letterpress implements Game {
 			break;
 		}
 	}
-	
+
 	private boolean isOver() {
 		boolean over = false;
 		if (bLastMove == null || rLastMove == null) {
@@ -261,7 +263,7 @@ public class Letterpress implements Game {
 		}
 		return over;
 	}
-	
+
 	/**
 	 * Letterpress constructor. Initializes the board and the dictionary.
 	 */
@@ -276,14 +278,13 @@ public class Letterpress implements Game {
 		Letterpress.ltrs = new HashMap<Integer, Character>(26);
 		for (int i = 0; i < letters.length; i++)
 			ltrs.put(i, letters[i]);
-		//build the gameboard
+		//build the game board
 		initializeBoard();
 		//build the dictionary
 		initializeDictionary();
 		supplementDictionary();
 		refineDictionary();
 		//initialize any other variables for play
-		//this.playedWords = new HashSet<String>();
 	}
 
 	/**
@@ -293,9 +294,10 @@ public class Letterpress implements Game {
 	public static void main(String[] args) {
 		Letterpress lp = new Letterpress();
 		new GreedyPlayer(lp);
-		new RandomPlayer(lp);
+		new WeightedGreedyPlayer(lp);
+		//		new GreedyPlayer(lp);
 	}
-	
+
 	private void makeMove(LMove m){
 		Status changeTo = null;
 		Status noChange = null;
@@ -321,15 +323,13 @@ public class Letterpress implements Game {
 			LCoord c = i.next();
 			mStr += board[c.getRow()][c.getCol()];
 		}
-		
+
 		for (Iterator<String> i = dict.iterator();i.hasNext();){
 			if (mStr.startsWith(i.next())){
 				i.remove();
 			}
 		}
 		//change the color of the tiles if that's applicable
-		
-		
 		switch(this.getCPlayer()){
 		case RED:
 			changeTo = Status.RED;
@@ -350,7 +350,6 @@ public class Letterpress implements Game {
 		//update the status of the game board
 		this.checkDefended();
 	}
-	
 
 
 	/**
@@ -361,13 +360,15 @@ public class Letterpress implements Game {
 		System.out.println(s);
 	}
 
+
 	/**
 	 * Makes printing that much easier.
 	 */
 	public static void p() {
 		System.out.println();
 	}
-	
+
+
 	/**
 	 * Prints out the current board.
 	 */
@@ -403,13 +404,27 @@ public class Letterpress implements Game {
 		}
 		p("");
 	}
-	
+
+	public void readyToPlay(Player p){
+		if(p == red){
+			this.redReady = true;
+		}else if (p == blue){
+			this.blueReady = true;
+		} else {
+			p("LOG: readytoPlay() called by unknown player "+p);
+		}
+		if(this.redReady == true && this.blueReady == true){
+			startGame();
+		}
+	}
+
 	@Override
 	public void receiveMove(Move move) {
 		this.receivedMv = (LMove) move;
 		this.waitForMove = false;
 	}
-	
+
+
 	/*private void receiveMove(LMove m) {
 		if (!m.isPass()) {
 			// CHECK THE WORD'S VALIDITY FOR THE BOARD
@@ -458,7 +473,8 @@ public class Letterpress implements Game {
 		dBoard();
 		notifyReadyForNextMove();
 	}*/
-	
+
+
 	private void refineDictionary() {
 		int dSize = dict.size();
 		if (board != null && dict != null && dict.size() > 0) {
@@ -475,7 +491,7 @@ public class Letterpress implements Game {
 					ltrCount[i] += 1;
 				}
 			}
-			p(Arrays.toString(ltrCount));
+			//p(Arrays.toString(ltrCount));
 			// loop through the dictionary and remove words that cannot be
 			// played
 			Iterator<String> iter = dict.iterator();
@@ -511,14 +527,15 @@ public class Letterpress implements Game {
 			p("LOG: Unable to refine dictionary.");
 		}
 	}
-	
+
+
 	private void run(){
-//		Scanner slow = new Scanner(System.in);
+		//		Scanner slow = new Scanner(System.in);
 		//check game is not over
 		int moves = 0;
 		while (!isOver()){
 			moves++;
-//			slow.nextLine();
+			//			slow.nextLine();
 			waitForMove = true;
 			//notify current player it is their turn
 			cPlayer.notifyOfTurn();
@@ -529,7 +546,8 @@ public class Letterpress implements Game {
 				makeMove(this.receivedMv);
 			}
 			// print the board for debugging
-			dBoard();
+			//dBoard();
+			pBoard();
 			//change the current player
 			switch(getCPlayer()){
 			case RED:
@@ -544,15 +562,16 @@ public class Letterpress implements Game {
 			//loop to 1
 		}
 		//game is over, print the score
-		p("moves: "+moves);
+		p("\nmoves: "+moves);
+		pBoard();
 		score();
 	}
-	
+
 	@Override
 	public void score() {
 		int rScore=0;
 		int bScore=0;
-		
+
 		for (int row = 0; row < 5; row++) {
 			for (int col = 0; col < 5; col++) {
 				switch(status[row][col]){
@@ -571,8 +590,38 @@ public class Letterpress implements Game {
 		p("LOG: Final score:\nRed\tBlue\n"+rScore+"\t"+bScore);
 
 	}
-	
+
+	public int score(Player p){
+		int rScore=0;
+		int bScore=0;
+
+		for (int row = 0; row < 5; row++) {
+			for (int col = 0; col < 5; col++) {
+				switch(status[row][col]){
+				case RED:
+				case RED_DEFENDED:
+					rScore +=1;
+					break;
+				case BLUE:
+				case BLUE_DEFENDED:
+					bScore +=1;
+				default:
+					break;
+				}
+			}
+		}
+		
+		if (p == red ){
+			return rScore;
+		} else if (p == blue){
+			return bScore;
+		} else {
+			p("LOG: Score called by unknown player.");
+			return -1;
+		}
+	}
 	private void startGame() {
+
 		//set the current player
 		Random r = new Random(0);
 		if (r.nextInt()%2 == 0){
@@ -584,12 +633,14 @@ public class Letterpress implements Game {
 		waitForMove = false;
 		run();
 	}
-	
+
+
 	@Override
 	public GameState state() {
 		return new GameState(board, status, dict);
 	}
-	
+
+
 	private void supplementDictionary() {
 		int dSize = dict.size();
 		File dictionary = new File("SortedDictionary.txt");
@@ -613,9 +664,10 @@ public class Letterpress implements Game {
 
 	@Override
 	public void undoMove() {
-
+		//stub
 	}
-	
+
+
 	public boolean validateMove(LMove m){
 		boolean valid;
 		//check if move is a pass

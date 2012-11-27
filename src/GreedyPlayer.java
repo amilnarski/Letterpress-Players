@@ -6,6 +6,7 @@ public class GreedyPlayer extends LPlayer {
 
 	public GreedyPlayer(Game game) {
 		super(game);
+		super.notifyReadyToPlay();
 	}
 
 	public void giveMove(){

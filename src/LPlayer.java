@@ -25,4 +25,8 @@ public abstract class LPlayer implements Player{
 	protected void updateGameState(){
 		this.currentGameState = g.state();
 	}
+	
+	protected void notifyReadyToPlay(){
+		g.readyToPlay(this);
+	}
 }
