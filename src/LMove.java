@@ -11,6 +11,7 @@ import java.util.Iterator;
  */
 public class LMove extends Move{
 	private boolean isPass;
+	private String word;
 	ArrayList<LCoord> coord;
 
 	public LMove(LCoord[] ltrCoords) {
@@ -70,6 +71,18 @@ public class LMove extends Move{
 		} else {
 			Letterpress.p("LOG: LMove.iterator called on a pass move.");
 			return new ArrayList<LCoord>(0).iterator();
+		}
+	}
+	
+	public void setWord(String w){
+		this.word = w;
+	}
+	
+	public String getWord(){
+		if (this.word != null){
+			return this.word;
+		} else {
+			return "";
 		}
 	}
 

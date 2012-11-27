@@ -34,6 +34,7 @@ public class WeightedGreedyPlayer extends LPlayer {
 				Arrays.fill(used[j], false);
 			}
 			LMove mv = new LMove();
+			mv.setWord(move);
 			for (int k=0;k<move.length();k++){
 				char c = move.charAt(k);
 				for (int l =0; l<5; l++){
@@ -65,11 +66,11 @@ public class WeightedGreedyPlayer extends LPlayer {
 			}
 		}
 		//get letter positions for the best move
-		Letterpress.p(bestMove);
-		Letterpress.p(bestWeight);
 		if (bestMove == null){
 			super.g.receiveMove(new LMove());
 		} else {
+			Letterpress.p(bestMove.getWord());
+			Letterpress.p(bestWeight);
 			super.g.receiveMove(bestMove);
 		}
 	}
