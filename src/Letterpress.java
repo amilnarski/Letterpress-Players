@@ -217,7 +217,7 @@ public class Letterpress implements Game {
 		}
 		while (reader.hasNextLine()) {
 			String word = reader.nextLine();
-			dict.add(word);
+			//dict.add(word);
 		}
 	}
 
