@@ -1,5 +1,6 @@
-# Letterpress
-Working on Letterpress in Java, may add intelligent players.
+# Letterpress-Players
+Letterpress-Players is an implementation of [Loren Brichter's Letterpress][3] in Java, along with several players. Currently there are players which use random, greedy, and weighted greedy strategies. This implementation currently lives on the console.
+[3]:http://atebits.com/Letterpress/
 
 ## Classes
 ### BadCoordException
