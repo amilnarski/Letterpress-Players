@@ -22,7 +22,7 @@ public class WeightedGreedyPlayer extends LPlayer {
 		Letterpress.p(Arrays.toString(w[j]));
 		}
 		
-		//walk through the possible moves and get the longest move
+		//walk through the possible moves and get the best weighted move
 		LMove bestMove = null;
 		double bestWeight = 0.0;
 		while(i.hasNext()){
@@ -37,19 +37,9 @@ public class WeightedGreedyPlayer extends LPlayer {
 			mv.setWord(move);
 			for (int k=0;k<move.length();k++){
 				char c = move.charAt(k);
-				for (int l =0; l<5; l++){
-					boolean found = false;
-					for(int m = 0; m<5; m++){
-						if (super.currentGameState.getboard()[l][m] == c && used[l][m] == false){
-							mv.addLCoord(l, m);
-							used[l][m] = true;
-							found = true;
-							break;
-						}
-					}
-					if (found)
-						break;
-				}
+				LCoord bestLtr = getBestLtr(w,used,c); 
+				used[bestLtr.getRow()][bestLtr.getCol()] = true;
+				mv.addLCoord(bestLtr);
 			}
 			
 			//score the move vs. best weight
@@ -75,10 +65,32 @@ public class WeightedGreedyPlayer extends LPlayer {
 		}
 	}
 
+	private LCoord getBestLtr(double [][] w, boolean[][] used, char l){
+		LCoord lBest = null;
+		double wBest = 0;
+		char[][] board = super.currentGameState.getboard();
+		
+		for (int r = 0; r < 5; r++){
+			for (int c = 0; c < 5; c++){
+				if (board[r][c] == l && used[r][c]==false){
+					if (w[r][c] > wBest){
+						//Letterpress.p("This "+l+" is worth "+(positionWeights[r][c]-wBest)+" more.");
+						try{
+							lBest = new LCoord(r,c);
+							wBest = w[r][c];
+						} catch (BadCoordException e){
+							Letterpress.p(e);
+						}
+					}
+				}
+			}
+		}
+		//Letterpress.p(wBest);
+		return lBest;
+	}
+
+
 	private double[][] generateWeights(Letterpress.Status[][] status){
-		if(WeightedGreedyPlayer.positionWeights == null){
-			
-		} //this is here because the constructor doesn't come off the stack, so nothing after the super() call is evaluated until after the game is over
 		double[][] w = new double[5][5];
 		for (int i=0; i<5;i++)
 			Arrays.fill(w[i], 0.0);
@@ -112,19 +124,6 @@ public class WeightedGreedyPlayer extends LPlayer {
 				// test each surrounding piece & coordinates to see what this position's weight is
 				Iterator<Letterpress.Status> i = s.iterator();
 				double weight = 1.0;
-				/*//check corner else check border
-				if (row==0 || row==4){
-					if (col==0 || col==4){
-						//this is a corner
-						weight+=0.2;
-					} else {
-						//this is a border
-						weight += 0.1;
-					}
-				} else if (col==0 || col==4){
-					//this is a border
-					weight+=0.1;
-				}*/
 				//check undefended opponent
 				Letterpress.Status undef;
 				if(super.color == Letterpress.Color.RED){
@@ -154,7 +153,7 @@ public class WeightedGreedyPlayer extends LPlayer {
 				if(Letterpress.getColor(status[row1][col1]) != super.color){
 					w[row1][col1] = w[row1][col1]*WeightedGreedyPlayer.positionWeights[row1][col1];
 				} else {
-					w[row1][col1] = 0.5;
+					w[row1][col1] = 0.1;
 				}
 			}
 		}
