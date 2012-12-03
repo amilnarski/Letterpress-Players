@@ -8,7 +8,7 @@ public class WeightedGreedyPlayer extends LPlayer {
 
 	public WeightedGreedyPlayer(Game game) {
 		super(game);
-		WeightedGreedyPlayer.positionWeights = new double[][] {{2.0,1.5,1.5,1.5,2.0},{1.5,1.0,1.0,1.0,1.5},{1.5,1.0,1.0,1.0,1.5},{1.5,1.0,1.0,1.0,1.5},{2.0,1.5,1.5,1.5,2.0}};
+		WeightedGreedyPlayer.positionWeights = new double[][] {{2.0,1.75,1.5,1.75,2.0},{1.75,1.0,1.0,1.0,1.75},{1.5,1.0,1.0,1.0,1.5},{1.75,1.0,1.0,1.0,1.75},{2.0,1.75,1.5,1.75,2.0}};
 		super.notifyReadyToPlay();
 	}
 
@@ -16,11 +16,16 @@ public class WeightedGreedyPlayer extends LPlayer {
 		//get the game's current state
 		super.updateGameState();
 		//update the weights for the new state
-		double[][] w =generateWeights(super.currentGameState.getStatus());
+		double[][] w = newGenerateWeights(super.currentGameState.getStatus());
+		//double[][] w1 = generateWeights(super.currentGameState.getStatus());
 		Iterator<String> i = super.currentGameState.getDict().iterator();
 		for(int j =0; j<5;j++){
 		Letterpress.p(Arrays.toString(w[j]));
 		}
+		//Letterpress.p();
+//		for(int j =0; j<5;j++){
+//			Letterpress.p(Arrays.toString(w1[j]));
+//			}
 		
 		//walk through the possible moves and get the best weighted move
 		LMove bestMove = null;
@@ -89,11 +94,10 @@ public class WeightedGreedyPlayer extends LPlayer {
 		return lBest;
 	}
 
-
 	private double[][] generateWeights(Letterpress.Status[][] status){
 		double[][] w = new double[5][5];
-		for (int i=0; i<5;i++)
-			Arrays.fill(w[i], 0.0);
+		//for (int i=0; i<5;i++) //save this loop since array is initialized to 0
+			//Arrays.fill(w[i], 0.0);
 		//determine features for each letter on the board
 		//calculate the weights based on relative features
 		for (int row = 0; row < status.length; row++) {
@@ -138,7 +142,7 @@ public class WeightedGreedyPlayer extends LPlayer {
 					//weight+=0.2;
 					weight+=0.5; //add incentive to take undefended letters from opponent
 				} else if (status[row][col] == def){
-					weight = 0.1; //disincentive to use defended letters since these don't change
+					weight = 0.1; //disincentive to use defended letters since these don't change the game state
 				}
 				//check frontier
 				while (i.hasNext()) {
@@ -162,7 +166,76 @@ public class WeightedGreedyPlayer extends LPlayer {
 				}
 			}
 		}
+		//return results
+		return w;
+	}
 
+	private double[][] newGenerateWeights(Letterpress.Status[][] status){
+		double[][] w = new double[5][5];
+		//determine features for each letter on the board
+		//calculate the weights based on relative features
+		for (int row = 0; row < status.length; row++) {
+			for (int col = 0; col < status.length; col++) {
+				//initialize switching statuses
+				Letterpress.Status undef;
+				Letterpress.Status def;
+				if(super.color == Letterpress.Color.RED){
+					undef = Letterpress.Status.BLUE;
+					def = Letterpress.Status.BLUE_DEFENDED;
+				}else{
+					undef = Letterpress.Status.RED;
+					def = Letterpress.Status.RED_DEFENDED;
+				}
+				
+				//switch based on status
+				Letterpress.Status s = status[row][col];
+				if (s == def || Letterpress.getColor(s)==super.color){
+					w[row][col] = 0.01;
+				} else if (s == undef || s == Letterpress.Status.NEUTRAL){
+					w[row][col] = 1.0;
+					if (s == undef){
+						w[row][col]+=0.5;
+					}
+					// build adjacent positions
+					HashSet<Letterpress.Status> statuses = new HashSet<Letterpress.Status>();
+					LCoord c;
+					try {
+						c = new LCoord(row, col - 1);
+						statuses.add(status[c.getRow()][c.getCol()]);
+					} catch (BadCoordException e) {
+					}
+					try {
+						c = new LCoord(row, col + 1);
+						statuses.add(status[c.getRow()][c.getCol()]);
+					} catch (BadCoordException e) {
+					}
+					try {
+						c = new LCoord(row - 1, col);
+						statuses.add(status[c.getRow()][c.getCol()]);
+					} catch (BadCoordException e) {
+					}
+					try {
+						c = new LCoord(row + 1, col);
+						statuses.add(status[c.getRow()][c.getCol()]);
+					} catch (BadCoordException e) {
+					}
+					// test each surrounding piece & coordinates to see what this position's weight is
+					Iterator<Letterpress.Status> i = statuses.iterator();
+					//check frontier
+					while (i.hasNext()) {
+						Letterpress.Color neighborColor = Letterpress.getColor(i.next());
+						if (neighborColor == super.color){
+							//weight+=0.02;
+							w[row][col]+=1.0;
+						}
+					}//end while
+					//multiply by the position mask
+					w[row][col] = w[row][col]*WeightedGreedyPlayer.positionWeights[row][col];
+				} else {
+					Letterpress.p("You seem to have forgotten the case where s is "+s);
+				}
+			} //end for each col
+		}//end for each row
 		//return results
 		return w;
 	}
