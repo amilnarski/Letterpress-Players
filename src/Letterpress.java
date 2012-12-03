@@ -187,7 +187,8 @@ public class Letterpress implements Game {
 	 */
 	private void initializeBoard() {
 		Letterpress.board = new char[5][5];
-		Random gen = new Random(0);
+		Random gen = new Random(0); //debug
+		//Random gen = new Random(); //test
 		for (int row = 0; row < board.length; row++) {
 			for (int col = 0; col < board.length; col++) {
 				Letterpress.board[row][col] = ltrs.get(gen.nextInt(26));
@@ -294,8 +295,9 @@ public class Letterpress implements Game {
 	public static void main(String[] args) {
 		Letterpress lp = new Letterpress();
 		new GreedyPlayer(lp);
+		//new GreedyPlayer(lp);
 		new WeightedGreedyPlayer(lp);
-		//		new GreedyPlayer(lp);
+		p(dict.size());
 	}
 
 	private void makeMove(LMove m){

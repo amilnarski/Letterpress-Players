@@ -29,4 +29,47 @@ public abstract class LPlayer implements Player{
 	protected void notifyReadyToPlay(){
 		g.readyToPlay(this);
 	}
+	
+	protected LCoord getSignificantLetter(boolean[][] used, char l) {
+		LCoord letter = null;
+		boolean changesState = false;
+		Letterpress.Status undef;
+		switch (color) {
+		case BLUE:
+			undef = Letterpress.Status.RED;
+			break;
+		case RED:
+			undef = Letterpress.Status.BLUE;
+			break;
+		default:
+			undef = null;
+			break;
+		}
+
+		char[][] board = currentGameState.getboard();
+
+		for (int r = 0; r < 5; r++) {
+			for (int c = 0; c < 5; c++) {
+				if (board[r][c] == l && used[r][c] == false) {
+					Letterpress.Status s = currentGameState.getStatus()[r][c];
+					LCoord coord = null;
+					try {
+						coord = new LCoord(r, c);
+					} catch (BadCoordException e) {
+						e.printStackTrace();
+					}
+					if (s == undef || s == Letterpress.Status.NEUTRAL) {
+						letter = coord;
+						changesState = true;
+					} else {
+						if (changesState == false) {
+							letter = coord;
+						}
+					}
+				}
+			}
+		}
+
+		return letter;
+	}
 }
