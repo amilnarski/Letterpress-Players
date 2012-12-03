@@ -4,11 +4,11 @@ import java.util.Scanner;
 
 public class HumanPlayer extends LPlayer {
 
-	public HumanPlayer(Game game) {
-		super(game);
+	public HumanPlayer() {
+		super();
 	}
 
-	public void giveMove(){
+	public LMove giveMove(){
 		pGameForUser(); //give the user a visual representation on the game
 		Scanner keyboard = new Scanner (System.in);
 		String mStr = keyboard.nextLine();
@@ -40,16 +40,17 @@ public class HumanPlayer extends LPlayer {
 		}
 		Letterpress.p(mWord);
 		if(super.currentGameState.getDict().contains(mWord)){
-			g.receiveMove(m); //submit the move to the game
+			return m; //return the move
 		} else {
 			Letterpress.p("That word was not found in the dictionary or has already been played. Try a different word.");
 			giveMove();
 		}
+		return null;
 		
 	}
 	
 	private void pGameForUser(){
-		super.updateGameState();
+		//super.updateGameState();
 		Letterpress.p(super.currentGameState);
 		Letterpress.p("Enter your next move as a string of unseperated coordinates, eg. 0011223344.");
 	}

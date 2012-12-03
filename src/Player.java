@@ -1,6 +1,8 @@
 
 public interface Player {
-	public void notifyOfTurn();
-	public void giveMove();
+	//move handling methods
+	public Move giveMove();
+	//game management methods
 	public void giveColor(Letterpress.Color c);
+	public void notifyOfTurn();
 }

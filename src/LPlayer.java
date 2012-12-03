@@ -1,20 +1,18 @@
 
-public abstract class LPlayer implements Player{
-	protected Game g;
+public abstract class LPlayer implements Player, Comparable<LPlayer>{
 	protected GameState currentGameState;
 	protected Letterpress.Color color;
 	
-	public LPlayer(Game game){
-		this.g = game;
-		g.assignPlayer(this);
+	public LPlayer(){
 	}
 	
 	public void notifyOfTurn(){
 		giveMove();
 	}
 	
-	public void giveMove(){
+	public Move giveMove(){
 		Letterpress.p("LOG: LPlayer's giveMove() called. This needs to be overridden by any subclasses.");
+		return null;
 	}
 	
 	public void giveColor(Letterpress.Color c){
@@ -22,12 +20,8 @@ public abstract class LPlayer implements Player{
 		Letterpress.p(this+" was assigned the color "+this.color);
 	}
 	
-	protected void updateGameState(){
-		this.currentGameState = g.state();
-	}
-	
-	protected void notifyReadyToPlay(){
-		g.readyToPlay(this);
+	protected void updateGameState(GameState state){
+		this.currentGameState = state;
 	}
 	
 	protected LCoord getSignificantLetter(boolean[][] used, char l) {
@@ -71,5 +65,23 @@ public abstract class LPlayer implements Player{
 		}
 
 		return letter;
+	}
+	
+	public Letterpress.Color getColor(){
+		return color;
+	}
+	
+	public int compareTo(LPlayer p){
+		int equality;
+		if (color == p.getColor()){
+			equality = 0;
+		} else {
+			equality = -1;
+		}
+		return equality;
+	}
+	
+	public String toString(){
+		return ""+color;
 	}
 }

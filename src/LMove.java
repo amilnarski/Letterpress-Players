@@ -85,5 +85,13 @@ public class LMove extends Move{
 			return "";
 		}
 	}
+	
+	public String toString(){
+		if (this.word != null){
+			return this.word;
+		} else {
+			return "";
+		}
+	}
 
 }

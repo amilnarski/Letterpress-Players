@@ -6,27 +6,18 @@ public class WeightedGreedyPlayer extends LPlayer {
 
 	private static double[][] positionWeights;
 
-	public WeightedGreedyPlayer(Game game) {
-		super(game);
+	public WeightedGreedyPlayer() {
 		WeightedGreedyPlayer.positionWeights = new double[][] {{2.0,1.75,1.5,1.75,2.0},{1.75,1.0,1.0,1.0,1.75},{1.5,1.0,1.0,1.0,1.5},{1.75,1.0,1.0,1.0,1.75},{2.0,1.75,1.5,1.75,2.0}};
-		super.notifyReadyToPlay();
 	}
 
-	public void giveMove(){
-		//get the game's current state
-		super.updateGameState();
+	public Move giveMove(){
 		//update the weights for the new state
 		double[][] w = newGenerateWeights(super.currentGameState.getStatus());
 		//double[][] w1 = generateWeights(super.currentGameState.getStatus());
 		Iterator<String> i = super.currentGameState.getDict().iterator();
 		for(int j =0; j<5;j++){
 		Letterpress.p(Arrays.toString(w[j]));
-		}
-		//Letterpress.p();
-//		for(int j =0; j<5;j++){
-//			Letterpress.p(Arrays.toString(w1[j]));
-//			}
-		
+		}		
 		//walk through the possible moves and get the best weighted move
 		LMove bestMove = null;
 		double bestWeight = 0.0;
@@ -62,11 +53,11 @@ public class WeightedGreedyPlayer extends LPlayer {
 		}
 		//get letter positions for the best move
 		if (bestMove == null){
-			super.g.receiveMove(new LMove());
+			return new LMove();
 		} else {
-			Letterpress.p(bestMove.getWord());
-			Letterpress.p(bestWeight);
-			super.g.receiveMove(bestMove);
+			//Letterpress.p(bestMove.getWord());
+			Letterpress.p("Move Weight: "+bestWeight);
+			return bestMove;
 		}
 	}
 
