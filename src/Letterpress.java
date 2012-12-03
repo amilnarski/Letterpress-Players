@@ -428,7 +428,7 @@ public class Letterpress implements Game {
 	}
 
 	private void refineDictionary() {
-		int dSize = dict.size();
+		//int dSize = dict.size();
 		if (board != null && dict != null && dict.size() > 0) {
 			// build counted list of char in the game board and a list of their
 			// counts
@@ -540,7 +540,7 @@ public class Letterpress implements Game {
 		return new GameState(board, status, dict);
 	}
 
-	private void supplementDictionary() {
+	/*private void supplementDictionary() {
 		int dSize = dict.size();
 		File dictionary = new File("SortedDictionary.txt");
 		Scanner reader;
@@ -560,7 +560,7 @@ public class Letterpress implements Game {
 		p("LOG: Supplemented the dictionary with " + (dict.size() - dSize)
 				+ " words. Now have " + dict.size() + " words.");
 	}
-
+*/
 	@Override
 	public void undoMove() {
 		// stub

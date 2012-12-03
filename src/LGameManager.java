@@ -46,8 +46,7 @@ public class LGameManager implements GameManager {
 			Letterpress.dBoard();
 		}
 		HashMap<Player, Double> score = lp.getScore();
-		log(red + ":" + score.get(red));
-		log(blue + ":" + score.get(blue));
+		log(red + ":" + score.get(red)+"\t\t"+blue + ":" + score.get(blue));
 		log(moves +" moves were made.");
 	}
 
@@ -87,26 +86,9 @@ public class LGameManager implements GameManager {
 		blue = new WeightedGreedyPlayer();
 		lp.assignPlayer(red);
 		lp.assignPlayer(blue);
-		// while (!oneReady || !twoReady) {
-		// System.out.println("Waiting for players to be ready...")
-		// }
 
 		gm.run();
 	}
-
-/*	@Override
-	public void notifyReadyToPlay(Player player) {
-		LPlayer p = (LPlayer) player;
-		lp.assignPlayer(p);
-		if (p.getColor() == Letterpress.Color.RED) {
-			this.red = p;
-		} else if (p.getColor() == Letterpress.Color.BLUE) {
-			this.blue = p;
-		} else {
-			log("Someone else, " + p + ", is ready to play this game.");
-		}
-
-	}*/
 
 	@Override
 	public Game getGame() {
