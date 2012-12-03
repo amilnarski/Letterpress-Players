@@ -126,14 +126,19 @@ public class WeightedGreedyPlayer extends LPlayer {
 				double weight = 1.0;
 				//check undefended opponent
 				Letterpress.Status undef;
+				Letterpress.Status def;
 				if(super.color == Letterpress.Color.RED){
 					undef = Letterpress.Status.BLUE;
+					def = Letterpress.Status.BLUE_DEFENDED;
 				}else{
 					undef = Letterpress.Status.RED;
+					def = Letterpress.Status.RED_DEFENDED;
 				}
 				if (status[row][col] == undef){
 					//weight+=0.2;
-					weight+=0.5;
+					weight+=0.5; //add incentive to take undefended letters from opponent
+				} else if (status[row][col] == def){
+					weight = 0.1; //disincentive to use defended letters since these don't change
 				}
 				//check frontier
 				while (i.hasNext()) {
@@ -153,7 +158,7 @@ public class WeightedGreedyPlayer extends LPlayer {
 				if(Letterpress.getColor(status[row1][col1]) != super.color){
 					w[row1][col1] = w[row1][col1]*WeightedGreedyPlayer.positionWeights[row1][col1];
 				} else {
-					w[row1][col1] = 0.1;
+					w[row1][col1] = 0.1;//disincentive for using own letters
 				}
 			}
 		}
