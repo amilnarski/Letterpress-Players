@@ -22,8 +22,9 @@ public class Letterpress implements Game {
 	// CLASS VARIABLES
 	private Player red;
 	private Player blue;
-	//private boolean redReady;
-	//private boolean blueReady;
+
+	// private boolean redReady;
+	// private boolean blueReady;
 
 	protected static enum Status {
 		NEUTRAL, RED, BLUE, RED_DEFENDED, BLUE_DEFENDED
@@ -51,7 +52,7 @@ public class Letterpress implements Game {
 		} else if (this.blue == null) {
 			this.blue = player;
 			this.blue.giveColor(Color.BLUE);
-			
+
 			// choose the first player
 			Random gen = new Random(0);
 			if (gen.nextInt() % 2 == 0)
@@ -198,8 +199,22 @@ public class Letterpress implements Game {
 	 */
 	private void initializeBoard() {
 		Letterpress.board = new char[5][5];
-		Random gen = new Random(0); // debug
-		// Random gen = new Random(); //test
+		Random gen;
+		switch (LGameManager.runState) {
+		case DEBUG:
+			gen = new Random(0);
+			break;
+		case RUN:
+			gen = new Random();
+			break;
+		case TEST:
+			gen = new Random();
+			break;
+		default:
+			gen = new Random();
+			break;
+		}
+
 		for (int row = 0; row < board.length; row++) {
 			for (int col = 0; col < board.length; col++) {
 				Letterpress.board[row][col] = ltrs.get(gen.nextInt(26));
@@ -231,7 +246,7 @@ public class Letterpress implements Game {
 			String word = reader.nextLine();
 			dict.add(word.toUpperCase());
 		}
-		p("Dictionary size is: "+ dict.size());
+		p("Dictionary size is: " + dict.size());
 	}
 
 	private void isDefended(int row, int col) {
@@ -281,7 +296,7 @@ public class Letterpress implements Game {
 	 * Letterpress constructor. Initializes the board and the dictionary.
 	 */
 	public Letterpress(GameManager gm) {
-		
+
 		// set up the [0,25] --> letter map
 		Letterpress.ltrs = new HashMap<Integer, Character>(26);
 		for (int i = 0; i < letters.length; i++)
@@ -290,7 +305,7 @@ public class Letterpress implements Game {
 		initializeBoard();
 		// build the dictionary
 		initializeDictionary();
-		//supplementDictionary();
+		// supplementDictionary();
 		refineDictionary();
 		// initialize any other variables for play
 	}
@@ -313,40 +328,41 @@ public class Letterpress implements Game {
 			}
 			if (m.isPass()) {
 				p("[PASS]");
-				return;
-			}
-			// throw all prefixes of the word out of the dictionary
-			String mStr = "";
-			for (Iterator<LCoord> i = m.iterator(); i.hasNext();) {
-				LCoord c = i.next();
-				mStr += board[c.getRow()][c.getCol()];
-			}
 
-			for (Iterator<String> i = dict.iterator(); i.hasNext();) {
-				if (mStr.startsWith(i.next())) {
-					i.remove();
+			} else {
+				// throw all prefixes of the word out of the dictionary
+				String mStr = "";
+				for (Iterator<LCoord> i = m.iterator(); i.hasNext();) {
+					LCoord c = i.next();
+					mStr += board[c.getRow()][c.getCol()];
 				}
-			}
-			// change the color of the tiles if that's applicable
-			switch (this.getCPlayer()) {
-			case RED:
-				changeTo = Status.RED;
-				noChange = Status.BLUE_DEFENDED;
-				break;
-			case BLUE:
-				changeTo = Status.BLUE;
-				noChange = Status.RED_DEFENDED;
-				break;
-			}
-			Iterator<LCoord> i = m.iterator();
-			while (i.hasNext()) {
-				LCoord c = i.next();
-				if (Letterpress.status[c.getRow()][c.getCol()] != noChange) {
-					Letterpress.status[c.getRow()][c.getCol()] = changeTo;
+
+				for (Iterator<String> i = dict.iterator(); i.hasNext();) {
+					if (mStr.startsWith(i.next())) {
+						i.remove();
+					}
 				}
+				// change the color of the tiles if that's applicable
+				switch (this.getCPlayer()) {
+				case RED:
+					changeTo = Status.RED;
+					noChange = Status.BLUE_DEFENDED;
+					break;
+				case BLUE:
+					changeTo = Status.BLUE;
+					noChange = Status.RED_DEFENDED;
+					break;
+				}
+				Iterator<LCoord> i = m.iterator();
+				while (i.hasNext()) {
+					LCoord c = i.next();
+					if (Letterpress.status[c.getRow()][c.getCol()] != noChange) {
+						Letterpress.status[c.getRow()][c.getCol()] = changeTo;
+					}
+				}
+				// update the status of the game board
+				this.checkDefended();
 			}
-			// update the status of the game board
-			this.checkDefended();
 			switch (this.getCPlayer()) {
 			case RED:
 				this.cPlayer = this.blue;
@@ -455,9 +471,10 @@ public class Letterpress implements Game {
 				}
 			} // end while iter.hasNext
 
-			/*p("LOG: Refine removed " + (dSize - dict.size())
-					+ " words from the dictionary. " + dict.size()
-					+ " words remain.");*/
+			/*
+			 * p("LOG: Refine removed " + (dSize - dict.size()) +
+			 * " words from the dictionary. " + dict.size() + " words remain.");
+			 */
 		} else {
 			p("LOG: Unable to refine dictionary.");
 		}

@@ -89,6 +89,8 @@ public class LMove extends Move{
 	public String toString(){
 		if (this.word != null){
 			return this.word;
+		} else if (isPass == true) {
+			return "-PASSED-";
 		} else {
 			return "";
 		}

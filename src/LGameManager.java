@@ -6,7 +6,7 @@ public class LGameManager implements GameManager {
 	private static LPlayer red;
 	private static LPlayer blue;
 	private static Random gen;
-	private static runStates runState;
+	protected static runStates runState;
 
 	public enum runStates {
 		DEBUG, RUN, TEST
